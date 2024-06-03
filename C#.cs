@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace labasd17_1
+namespace rk
 {
     class Program
     {

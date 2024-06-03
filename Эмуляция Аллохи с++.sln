@@ -1,31 +1,144 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.2.32519.379
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Арх ЭВМ лаба 8 с++", "Арх ЭВМ лаба 8 с++\Арх ЭВМ лаба 8 с++.vcxproj", "{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}.Debug|x64.ActiveCfg = Debug|x64
-		{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}.Debug|x64.Build.0 = Debug|x64
-		{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}.Debug|x86.ActiveCfg = Debug|Win32
-		{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}.Debug|x86.Build.0 = Debug|Win32
-		{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}.Release|x64.ActiveCfg = Release|x64
-		{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}.Release|x64.Build.0 = Release|x64
-		{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}.Release|x86.ActiveCfg = Release|Win32
-		{2A1C7CCF-95EE-45E3-BFE5-51745282A6C5}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {5EA8517E-5C90-401E-B6B7-5968EEDB3DD2}
-	EndGlobalSection
-EndGlobal
+// OpenMP - Example.cpp
+#include "pch.h"
+
+
+const int N = 7;
+const double l = 1.2;
+const int packege = 5;
+
+int two_point(int packetg, int capacity)
+{
+	int new_capacity = capacity - packetg;
+	return new_capacity;
+}
+
+int capacity_up(int rnd, int capacity)
+{
+	int result = capacity + rnd;
+	int result_2 = 0;
+	std::cout << "capacity_up " << result << "\n";
+	if (result < 0)
+	{
+		capacity_up(rnd*2, result);
+	}
+	else
+	{
+		return result;
+	}
+
+}
+
+int main(int argc)
+{
+	//включаем поддержку русского языка в консоли
+	setlocale(LC_ALL, "Russian");
+	//отключение выбора количества потоков (нитей) по умолчанию
+	omp_set_dynamic(false);
+	//заданние числа используемых потоков
+	omp_set_num_threads(N);
+	//определение типа переменных блока распараллеливания
+	int nTheads, theadNum;
+#pragma omp parallel private(nTheads, theadNum)
+	{
+		nTheads = omp_get_num_threads();
+		theadNum = omp_get_thread_num();
+		//вывод на экран номера и количества используемых потоков
+		printf("OpenMP поток №%d из %d потоков\n", theadNum, nTheads);
+	}
+	//переменные для хранения суммы, значения аргумента и счетчик цикла
+	double sum_3 = 60, sum_2 = 0.0, x, sum = 0.0;
+	double h;
+	int i;
+	int j;
+	int rnd;
+	//сохраняем время начала теста
+	// Метод чистой Алохи
+	// 1 - пакеты поступают в канал случайно
+	// 2 - если в один момент времени в канал поступают более одного пакета, все поступающие пакеты считаются потерянными
+	// 3 - осуществляется повторная передача
+	double startTime = omp_get_wtime();
+	//начало области распараллеливания цикла переменная i -
+	//приватная, переменная sum обновляется всеми потоками
+	int result = 0;
+	int lost_paketg = 0;
+	int M = 1000;
+	int k = 0;
+	int capacity_1 = 0;
+	bool free = true;
+	int show_chanal = 0;
+	while (k < 1000)
+	{
+		int capacity = 40;
+		int sum_1 = 0;
+		k += 1;
+#pragma omp parallel for default(shared)\
+						 private(i)\
+						 reduction (+:sum_1)
+		for (i = 1; i < N; i++)
+		{
+			rnd = rand() % 3;
+			//std::cout << "Случайное число : " << i << " * " << rnd << "\n";
+			std::cout << " " << "\n";
+			rnd = (rnd * i) / 2;
+			//std::cout << "Случайное число : "<< i  <<  "  : rnd:" << rnd << "\n";
+			std::cout << " " << "\n";
+			//std::cout << "\n" << "\n" << "\n";
+			//std::cout << capacity << "\n";
+			result += rnd;
+			//if (free == true) { std::cout << "Канал для узла " << i << " свободен  free : " << free<< "\n"; }
+			//else { std::cout << "Канал занят для узла " << i <<" free : " << free <<"\n"; }
+			if (free == true) // Если канал свободен
+			{
+				show_chanal += 1;
+				if (show_chanal > 1) {
+					std::cout << "Канал занят для узла " << i << "\n";
+					std::cout << "Ошибка передачи пакета узлом : " << i <<" show_chanal : " << show_chanal << "\n";
+				}
+				else
+				{
+					std::cout << "Канал для узла " << i << " свободен" << "\n";
+					std::cout << "Передача пакета узлом " << i << "\n";
+				}
+				free = false; // Если канал свободен, ставим метку занят
+				capacity = two_point(rnd, capacity);
+				if (capacity < 0)
+				{
+					std::cout << "Потеря пакетов !!!  : " << N - i << " из " << N << "\n";
+					capacity_1 = capacity_up(rnd, capacity);
+					std::cout << "Повторная отправка пакетов, пропускная способность канала равна : " << capacity_1 << "\n";
+					capacity = two_point(rnd, capacity);
+					lost_paketg += 1;
+					free = true;
+				}
+				else
+				{
+					free = true;
+					if (capacity < 35) 
+					{
+						capacity += 5;
+					}
+				}
+			}
+			//std::cout << "sum_1  - rnd = " << sum_1 << rnd <<"\n";
+		}
+		//std::cout << "Проходит еденица времени передачи "<<  " Время потраченное на пропускание пакетов : "<< sum_1 << "\n";
+		show_chanal = 0;
+		std::cout << "Конец временной единицы передачи пакетов в сети ";
+	}
+	std::cout << "Колличество пакетов в сети: " << result << "\n";
+	std::cout << "Колличество потерянных пакетов в сети: " << lost_paketg << "\n";
+	double result_2 = 0.0;
+	result_2 = ((lost_paketg * 100.0) / result);
+	std::cout << "Процент потери пакетов : " << result_2 << " % " << "\n";
+	//сохраняем время окончания теста
+	double endTime = omp_get_wtime();
+	//выводим сообщения об окончании работы потоками
+#pragma omp parallel private(theadNum)
+	{
+		theadNum = omp_get_thread_num();
+		printf("Поток №%d окончил вычисления... \n", theadNum);
+	}
+	//выводим время работы теста на экран
+	printf("Время вычисления %f\n", endTime - startTime);
+	return 0;
+}
